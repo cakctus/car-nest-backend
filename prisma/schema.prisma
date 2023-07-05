@@ -1,0 +1,418 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int                     @id @default(autoincrement())
+  password           String
+  lastLogin          DateTime?
+  isSuperuser        Boolean                 @default(false)
+  seller             String                  @default("private")
+  username           String?                 @unique
+  number             String?                 @unique
+  countryCode        String                  @default("+373")
+  comunicationMethod String                  @default("phone")
+  firstName          String                  @default("")
+  lastName           String                  @default("")
+  email              String                  @unique
+  userPhoto          String                  @default("")
+  userProfilePhoto   String?                 @default("")
+  isStaff            Boolean?                @default(false)
+  isActive           Boolean?
+  dateJoined         DateTime
+  activationLink     String
+  isActivated        Boolean                 @default(false)
+  accessToken        String?
+  refreshToken       String?
+  resetPasswordLink  String?
+  numbers            Number[]
+  cars               Car[]
+  motos              Moto[]
+  bus                BusMicrobus[]
+  trucks             Truck[]
+  tractor            Agriculture[]
+  construction       Construction[]
+  trailer            Trailer[]
+  parts              CarParts[]
+  truckParts         TruckParts[]
+  battery            Batteries[]
+  mirrors            CarMirrorsGlassOptics[]
+  Token              Token[]
+  wheelTire          WheelsTire[]
+  autoService        AutoService[]
+  Message            Message[]
+  Chat               Chat[]
+}
+
+model Number {
+  id     Int     @id @default(autoincrement())
+  number String? @unique
+  User   User?   @relation(fields: [userId], references: [id])
+  userId Int?
+}
+
+model Token {
+  id           Int    @id @default(autoincrement())
+  refreshToken String @unique
+  user         User   @relation(fields: [userId], references: [id])
+  userId       Int
+}
+
+model Message {
+  id        Int       @id @default(autoincrement())
+  message   String
+  users     Int[]     @default([1, 1])
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    Int?
+  createdAt DateTime? @default(now())
+  read      Boolean   @default(false)
+}
+
+model Chat {
+  id              Int     @id @default(autoincrement())
+  myId            Int
+  oponentId       Int
+  usersId         Int[]
+  user            User?   @relation(fields: [userId], references: [id])
+  userId          Int?
+  oponentReadChat Boolean @default(false)
+}
+
+model Car {
+  id           Int      @id @default(autoincrement())
+  uuid         String?
+  brand        String
+  model        String
+  registration String
+  generation   String
+  modification String
+  condition    String
+  description  String?
+  region       String
+  price        String
+  currency     String
+  author       String
+  year         String
+  seats        String
+  steering     String
+  bodyType     String
+  doors        String?
+  mileage      String
+  mileageType  String
+  engineVolume String
+  enginePower  String?
+  fuelType     String
+  transmission String
+  drive        String
+  photo        String[]
+  contacts     String?
+  User         User?    @relation(fields: [userId], references: [id])
+  userId       Int?
+}
+
+model BusMicrobus {
+  id           Int      @id @default(autoincrement())
+  uuid         String?
+  brand        String
+  model        String
+  registration String
+  condition    String
+  description  String?
+  region       String
+  price        String
+  currency     String
+  steering     String
+  fuelType     String
+  transmission String
+  busBodyType  String
+  busCategory  String
+  year         String
+  engineVolume String
+  seats        String
+  mileage      String
+  mileageType  String
+  drive        String?
+  photo        String[]
+  contacts     String?
+  User         User?    @relation(fields: [userId], references: [id])
+  userId       Int?
+}
+
+model Truck {
+  id                     Int      @id @default(autoincrement())
+  uuid                   String?
+  brand                  String?
+  model                  String
+  registration           String
+  condition              String
+  description            String?
+  region                 String
+  price                  String
+  currency               String
+  steering               String
+  fuelType               String
+  truckBodyType          String
+  cabinType              String?
+  drive                  String
+  year                   String
+  engineVolume           String
+  enginPower             String
+  truckTransmissionsType String
+  mileage                String
+  mileageType            String
+  loadCapacity           String
+  loadCapacityType       String
+  totalWeighTitle        String
+  photo                  String[]
+  contacts               String?
+  User                   User?    @relation(fields: [userId], references: [id])
+  userId                 Int?
+}
+
+model Moto {
+  id                     Int      @id @default(autoincrement())
+  uuid                   String?
+  brand                  String
+  model                  String
+  registration           String
+  condition              String
+  description            String?
+  region                 String
+  price                  String
+  currency               String
+  motorcycleType         String
+  year                   String
+  engineVolume           String
+  mileage                String
+  mileageType            String
+  enginePower            String?
+  motorcycleTransmission String
+  photo                  String[]
+  contacts               String?
+  User                   User?    @relation(fields: [userId], references: [id])
+  userId                 Int?
+}
+
+model Agriculture {
+  id           Int      @id @default(autoincrement())
+  uuid         String?
+  title        String
+  description  String?
+  condition    String
+  region       String
+  price        String
+  currency     String
+  manufacturer String
+  tractorType  String
+  photo        String[]
+  contacts     String?
+  User         User?    @relation(fields: [userId], references: [id])
+  userId       Int?
+}
+
+model Trailer {
+  id               Int      @id @default(autoincrement())
+  uuid             String?
+  title            String
+  description      String?
+  region           String
+  price            String
+  currency         String
+  trailerTypes     String
+  year             String
+  trailerCondition String
+  photo            String[]
+  contacts         String?
+  User             User?    @relation(fields: [userId], references: [id])
+  userId           Int?
+}
+
+model Construction {
+  id                Int      @id @default(autoincrement())
+  uuid              String?
+  title             String
+  description       String?
+  region            String
+  price             String
+  currency          String
+  constructionTypes String
+  condition         String
+  photo             String[]
+  contacts          String?
+  User              User?    @relation(fields: [userId], references: [id])
+  userId            Int?
+}
+
+model WheelsTire {
+  id             Int      @id @default(autoincrement())
+  uuid           String?
+  wheelTireTypes String?
+  purpose        String?
+  title          String
+  description    String?
+  region         String
+  price          String
+  currency       String
+  disc           Disc?    @relation(fields: [DiscId], references: [id])
+  tire           Tire?    @relation(fields: [tireId], references: [id])
+  photo          String[]
+  contacts       String?
+  DiscId         Int?
+  tireId         Int?
+  User           User?    @relation(fields: [userId], references: [id])
+  userId         Int?
+}
+
+model Disc {
+  id         Int          @id @default(autoincrement())
+  discType   String?
+  diameter   String?
+  holeCount  String?
+  brand      String?
+  WheelsTire WheelsTire[]
+}
+
+model Tire {
+  id            Int          @id @default(autoincrement())
+  diameter      String?
+  profileWidth  String?
+  profileHeight String?
+  season        String?
+  condition     String?
+  brand         String?
+  WheelsTire    WheelsTire[]
+}
+
+model CarParts {
+  id             Int      @id @default(autoincrement())
+  uuid           String?
+  title          String
+  description    String?
+  region         String
+  price          String
+  currency       String
+  partsCategory  String
+  brand          String
+  model          String
+  generation     String
+  modification   String
+  partsCondition String
+  photo          String[]
+  contacts       String
+  User           User?    @relation(fields: [userId], references: [id])
+  userId         Int?
+}
+
+model TruckParts {
+  id             Int      @id @default(autoincrement())
+  uuid           String?
+  title          String
+  description    String?
+  region         String
+  partsCategory  String
+  price          String
+  currency       String
+  brand          String
+  partsCondition String
+  photo          String[]
+  contacts       String
+  User           User?    @relation(fields: [userId], references: [id])
+  userId         Int?
+}
+
+model CarMirrorsGlassOptics {
+  id          Int      @id @default(autoincrement())
+  uuid        String?
+  title       String
+  description String?
+  region      String
+  price       String
+  currency    String
+  type        String
+  photo       String[]
+  contacts    String
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      Int?
+}
+
+model Batteries {
+  id               Int      @id @default(autoincrement())
+  uuid             String?
+  title            String
+  description      String?
+  region           String
+  price            String
+  currency         String
+  batteryBrands    String
+  brand            String
+  model            String
+  carSeries        String?
+  applicability    String?
+  positiveTerminal String?
+  housingType      String?
+  electrolyteType  String?
+  terminals        String?
+  maintenanceLevel String?
+  mountingType     String?
+  partsCondition   String
+  capacity         String
+  photo            String[]
+  contacts         String
+  User             User?    @relation(fields: [userId], references: [id])
+  userId           Int?
+}
+
+model AutoService {
+  id          Int      @id @default(autoincrement())
+  uuid        String?
+  title       String
+  description String?
+  region      String
+  price       String
+  currency    String
+  photo       String[]
+  contacts    String
+
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Service   Service? @relation(fields: [serviceId], references: [id])
+  serviceId Int?
+  Repair    Repair?  @relation(fields: [repairId], references: [id])
+  repairId  Int?
+}
+
+model Service {
+  id                     Int           @id @default(autoincrement())
+  serviceForCars         Boolean       @default(false)
+  serviceForTrucks       Boolean       @default(false)
+  serviceForAgricultural Boolean       @default(false)
+  serviceForMinibuses    Boolean       @default(false)
+  serviceForBuses        Boolean       @default(false)
+  serviceForSpecial      Boolean       @default(false)
+  autoService            AutoService[]
+}
+
+model Repair {
+  id Int @id @default(autoincrement())
+
+  repairEngine            Boolean       @default(false)
+  repairChassis           Boolean       @default(false)
+  repairSafetySystems     Boolean       @default(false)
+  repairSuspension        Boolean       @default(false)
+  repairBodyAlignment     Boolean       @default(false)
+  repairGlassOptics       Boolean       @default(false)
+  repairElectrical        Boolean       @default(false)
+  repairTransmission      Boolean       @default(false)
+  repairAlarmSystems      Boolean       @default(false)
+  repairAirConditioning   Boolean       @default(false)
+  repairBodyFrames        Boolean       @default(false)
+  repairManagementSystems Boolean       @default(false)
+  repairPainting          Boolean       @default(false)
+  repairDetailing         Boolean       @default(false)
+  autoService             AutoService[]
+}
