@@ -1,0 +1,16 @@
+{
+  "deleteNumberError": "Невозможно удалить этот номер, так как он связан с некоторыми объявлениями",
+  "userExistsError": "Пользователь с электронной почтой {email} уже существует",
+  "emailDoesNotExist": "Пользователь с электронной почтой {email} не существует",
+  "incorrectPasswordError": "Пароль для адреса электронной почты: {email} неверный",
+  "numberExistsError": "Пользователь с номером: {number} уже существует",
+  "numberAlreadyExists": "Номер уже существует",
+  "maxPhotoLengthError": "Максимально допустимое количество фотографий {photoLength}",
+  "updatedAdDoesNoeExist": "Объявления с идентификатором {id} не существует",
+  "updatedUserDoesNoeExist": "Пользователь с идентификатором {id} не существует",
+  "updateAdRights": "Чтобы обновить эту статью, вы должны быть ее автором",
+  "invalidNumber": "Неверный номер, укажите правильный номер",
+  "insufficientRightsToDelete": "Недостаточно прав для удаления",
+  "invalidUserProvider": "Указан неверный идентификатор пользователя",
+  "userDoesNotExist": "Пользователь не существует"
+}

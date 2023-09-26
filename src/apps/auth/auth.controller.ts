@@ -1,3 +1,4 @@
+// nest
 import {
   Controller,
   Next,
@@ -9,14 +10,20 @@ import {
   HttpCode,
   HttpException,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { ConfigService } from '@nestjs/config';
+// express
 import { Request, Response, NextFunction } from 'express';
-
+// services
+import { AuthService } from './auth.service';
+// middleware
 import { UserRequestInterface } from './auth.middleware';
 
 @Controller('api')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Post('reg')
   async register(
@@ -25,13 +32,17 @@ export class AuthController {
     @Next() next: NextFunction,
   ) {
     try {
-      const { email, password, role } = req.body;
-      const data = await this.authService.reg(email, role, password);
+      const { email, password } = req.body;
+      const lang = req.cookies.lang || req.cookies.i18next;
+
+      const data: any = await this.authService.reg(email, password, lang);
+
       res.cookie('refreshToken', data.refreshToken, {
         maxAge: 15 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         // secure: true, // https
       });
+
       return res.json(data);
     } catch (error) {
       next(error);
@@ -41,13 +52,16 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   async login(
+    @Req() req: Request,
     @Body() body: any,
     @Res() res: Response,
     @Next() next: NextFunction,
   ) {
     try {
       const { email, password } = body;
-      const data = await this.authService.login(email, password);
+      const lang = req.cookies.lang || req.cookies.i18next;
+
+      const data = await this.authService.login(email, password, lang);
 
       res.cookie('refreshToken', data.refreshToken, {
         maxAge: 15 * 24 * 60 * 60 * 1000,
@@ -72,7 +86,9 @@ export class AuthController {
       const { userId } = req.body.userId;
 
       const data = await this.authService.logout(refreshToken, userId);
+
       res.clearCookie('refreshToken');
+
       return res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -87,8 +103,11 @@ export class AuthController {
   ) {
     try {
       const activationLink = req.params.link;
+      const clientUrl = this.configService.get('CLIENT_URL');
+
       await this.authService.activate(activationLink);
-      return res.redirect('http://localhost:3000');
+
+      return res.redirect(clientUrl);
     } catch (error) {
       next(error);
     }
@@ -102,11 +121,18 @@ export class AuthController {
   ) {
     try {
       const { refreshToken } = req.cookies;
+
       const data = await this.authService.refresh(refreshToken);
+
       res.cookie('refreshToken', data!.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
+
+      res.cookie('i18next', req.cookies.lang || 'en', {
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+      });
+
       return res.json(data);
     } catch (error) {
       res.clearCookie('refreshToken');

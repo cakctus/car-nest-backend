@@ -212,7 +212,7 @@ model Agriculture {
   region       String
   price        String
   currency     String
-  manufacturer String
+  manufacturer String?
   tractorType  String
   photo        String[]
   contacts     String?
@@ -315,7 +315,7 @@ model CarParts {
   modificationId String
   partsCondition String
   photo          String[]
-  contacts       String
+  contacts       String?
   User           User?    @relation(fields: [userId], references: [id])
   userId         Int?
 }
@@ -332,7 +332,7 @@ model TruckParts {
   brand          String
   partsCondition String
   photo          String[]
-  contacts       String
+  contacts       String?
   User           User?    @relation(fields: [userId], references: [id])
   userId         Int?
 }
@@ -347,7 +347,7 @@ model CarMirrorsGlassOptics {
   currency    String
   type        String
   photo       String[]
-  contacts    String
+  contacts    String?
   User        User?    @relation(fields: [userId], references: [id])
   userId      Int?
 }
@@ -375,7 +375,7 @@ model Batteries {
   partsCondition   String
   capacity         String
   photo            String[]
-  contacts         String
+  contacts         String?
   User             User?    @relation(fields: [userId], references: [id])
   userId           Int?
 }
@@ -389,7 +389,7 @@ model AutoService {
   price       String
   currency    String
   photo       String[]
-  contacts    String
+  contacts    String?
 
   User      User?    @relation(fields: [userId], references: [id])
   userId    Int?

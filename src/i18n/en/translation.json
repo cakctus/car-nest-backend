@@ -1,0 +1,16 @@
+{
+  "deleteNumberError": "This number cannot be deleted because it is associated with some ads",
+  "userExistsError": "A user with e-mail {email} already exists",
+  "emailDoesNotExist": "User with {email} e-mail does not exist",
+  "incorrectPasswordError": "The password for email: {email} is not correct",
+  "numberExistsError": "A user with the number: {number} already exists",
+  "numberAlreadyExists": "Number already exists",
+  "maxPhotoLengthError": "Maximum allowable number of photos {photoLength}",
+  "updatedAdDoesNoeExist": "Ad with id {id} does not exist",
+  "updatedUserDoesNoeExist": "User with id {id} does not exist",
+  "updateAdRights": "You must be the author to update this article",
+  "invalidNumber": "Invalid number, please provide correct number",
+  "insufficientRightsToDelete": "Insufficient rights to delete",
+  "invalidUserProvider": "Invalid userId provided",
+  "userDoesNotExist": "User does not exist"
+}

@@ -6,11 +6,17 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { TokenService } from 'src/apps/token/token.service';
+import { PrismaService } from 'src/apps/prisma/prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthMiddleware } from 'src/apps/auth/auth.middleware';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  providers: [AuthService, TokenService],
+  imports: [
+    // config
+    ConfigModule.forRoot(),
+  ],
+  providers: [AuthService, TokenService, PrismaService],
   controllers: [AuthController],
 })
 export class AuthModule implements NestModule {

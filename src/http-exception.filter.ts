@@ -8,7 +8,7 @@ import {
 import { Request, Response } from 'express';
 
 @Catch()
-export class ErrorFilter implements ExceptionFilter {
+export class CustomExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -23,6 +23,7 @@ export class ErrorFilter implements ExceptionFilter {
         ? exception.message || 'Internal Server Error'
         : 'Internal Server Error';
 
+    console.log(exception);
     response.status(status).json({
       statusCode: status,
       message: message,

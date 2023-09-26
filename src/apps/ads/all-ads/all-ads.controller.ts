@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Next,
-  Param,
-  ParseIntPipe,
-  Query,
-  Req,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Param, Res } from '@nestjs/common';
 import { AllAdsService } from './all-ads.service';
 
 import { Request, Response, NextFunction } from 'express';
@@ -18,20 +9,20 @@ export class AllAdsController {
 
   @Get('get-all-ads/:userId/:page/:limit/:categoryClicked')
   async getAllCars(
-    @Req() req: Request,
     @Res() res: Response,
-    @Next() next: NextFunction,
+    @Param('userId') userId: string,
+    @Param('page') page: number,
+    @Param('limit') limit: number,
   ) {
     try {
-      const { userId, page, limit } = req.params;
       const response = await this.allAdsService.getAllCars(
-        userId,
+        Number(userId),
         Number(page),
         Number(limit),
       );
       return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -40,17 +31,17 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllMotos(
-        userId,
+        Number(userId),
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -59,7 +50,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllBus(
@@ -67,9 +58,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -78,7 +69,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllTruck(
@@ -86,9 +77,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -97,7 +88,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllTractor(
@@ -105,9 +96,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -116,7 +107,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllConstruction(
@@ -124,9 +115,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -135,7 +126,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllTrailer(
@@ -143,9 +134,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -154,7 +145,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllParts(
@@ -162,9 +153,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -173,7 +164,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllTruckParts(
@@ -181,9 +172,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -192,7 +183,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllBattery(
@@ -200,9 +191,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -211,7 +202,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllWheelTire(
@@ -219,9 +210,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 
@@ -230,7 +221,7 @@ export class AllAdsController {
     @Param('userId') userId: string,
     @Param('page') page: number,
     @Param('limit') limit: number,
-    @Next() next: NextFunction,
+    @Res() res: Response,
   ) {
     try {
       const response = await this.allAdsService.getAllService(
@@ -238,9 +229,9 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return response;
+      return res.status(200).json(response);
     } catch (error) {
-      next(error);
+      throw error;
     }
   }
 }

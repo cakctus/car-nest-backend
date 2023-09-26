@@ -1,0 +1,16 @@
+{
+  "deleteNumberError": "Nu se poate șterge acest număr, deoarece este asociat cu unele anunțuri",
+  "userExistsError": "Un utilizator cu e-mail {email} există deja",
+  "emailDoesNotExist": "Utilizatorul cu {email} e-mail nu există",
+  "incorrectPasswordError": "Parola pentru adresa de e-mail: {email} nu este corectă",
+  "numberExistsError": "Un utilizator cu numărul: {number} deja există.",
+  "numberAlreadyExists": "Numărul există deja",
+  "maxPhotoLengthError": "Numărul maxim permis de fotografii {photoLength}",
+  "updatedAdDoesNoeExist": "Nu există niciun anunț cu id {id}",
+  "updatedUserDoesNoeExist": "Nu există niciun utilizator cu id {id}",
+  "updateAdRights": "Pentru a actualiza acest articol, trebuie să fii autorul",
+  "invalidNumber": "Număr nevalid, vă rugăm să introduceți numărul corect",
+  "insufficientRightsToDelete": "Drepturi insuficiente pentru ștergere",
+  "invalidUserProvider": "A fost furnizat un ID de utilizator nevalid",
+  "userDoesNotExist": "Utilizatorul nu exista"
+}

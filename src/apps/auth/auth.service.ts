@@ -1,22 +1,29 @@
+// nest
 import {
   BadRequestException,
+  HttpStatus,
+  HttpException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+//  i18n
+import { I18nService } from 'nestjs-i18n';
+// bcrypt && uuid
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+//  services
 import { TokenService } from 'src/apps/token/token.service';
+import { PrismaService } from 'src/apps/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
-  private readonly prisma: PrismaClient;
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tokenService: TokenService,
+    private readonly i18n: I18nService,
+  ) {}
 
-  constructor(private readonly tokenService: TokenService) {
-    this.prisma = new PrismaClient();
-  }
-
-  async reg(email: string, seller: string, password: string | Buffer) {
+  async reg(email: string, password: string | Buffer, lang: string) {
     // check if user already exists
     const candidate = await this.prisma.user.findUnique({
       where: {
@@ -26,8 +33,12 @@ export class AuthService {
 
     // if user exists
     if (candidate) {
-      throw new BadRequestException(
-        `A user with email: ${email} already exists.`,
+      throw new HttpException(
+        this.i18n.t('translation.userExistsError', {
+          lang,
+          args: { email },
+        }),
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -40,7 +51,6 @@ export class AuthService {
         password: hash,
         activationLink,
         dateJoined: new Date(),
-        // seller: seller,
       },
     });
 
@@ -75,7 +85,7 @@ export class AuthService {
     // send an email with verify
     // await mailService.mailService(
     //   email,
-    //   `http://localhost:5000/api/activate/${activationLink}`
+    //   `http://localhost:5000/api/activate/${activationLink}`,
     // );
 
     return {
@@ -106,23 +116,36 @@ export class AuthService {
     });
   }
 
-  async login(email: string, password: string | Buffer) {
+  async login(email: string, password: string | Buffer, lang: string) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: email,
       },
     });
 
-    // check if user exists
+    // throw error if user doesn't exist
     if (!user) {
-      throw new BadRequestException(`User with ${email} email does not exist.`);
+      throw new HttpException(
+        this.i18n.t('translation.userExistsError', {
+          lang,
+          args: { email },
+        }),
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // check password
     const isPassEqual = await bcrypt.compare(password, user.password);
 
+    // if password is not correct throw error
     if (!isPassEqual) {
-      throw new BadRequestException('Password is not correct.');
+      throw new HttpException(
+        this.i18n.t('translation.incorrectPasswordError', {
+          lang,
+          args: { email },
+        }),
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // user numbers
@@ -179,14 +202,20 @@ export class AuthService {
     if (!refreshToken) throw new UnauthorizedException();
 
     // check if token in db
-    // const userToken = await this.tokenService.findToken(refreshToken);
-    // if (!userToken) throw new UnauthorizedException()
+    const userToken = await this.tokenService.findToken(refreshToken);
+
+    // throw new UnauthorizedException if user already logged
+    if (!userToken)
+      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
 
     // check if token  is valid
     const validateToken = await this.tokenService.validateRefreshToken(
       refreshToken,
     );
-    if (!validateToken) throw new UnauthorizedException();
+
+    // throw new UnauthorizedException if toke is not valid;
+    if (!validateToken)
+      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
 
     const user = await this.prisma.user.findUnique({
       where: {
