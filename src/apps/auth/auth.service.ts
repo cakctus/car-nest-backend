@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 //  services
 import { TokenService } from 'src/apps/token/token.service';
+// prisma
 import { PrismaService } from 'src/apps/prisma/prisma.service';
 
 @Injectable()
@@ -202,11 +203,11 @@ export class AuthService {
     if (!refreshToken) throw new UnauthorizedException();
 
     // check if token in db
-    const userToken = await this.tokenService.findToken(refreshToken);
+    // const userToken = await this.tokenService.findToken(refreshToken);
 
-    // throw new UnauthorizedException if user already logged
-    if (!userToken)
-      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
+    // // throw new UnauthorizedException if user already logged
+    // if (!userToken)
+    //   throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
 
     // check if token  is valid
     const validateToken = await this.tokenService.validateRefreshToken(

@@ -23,10 +23,9 @@ export class CustomExceptionFilter implements ExceptionFilter {
         ? exception.message || 'Internal Server Error'
         : 'Internal Server Error';
 
-    console.log(exception);
     response.status(status).json({
       statusCode: status,
-      message: message,
+      message: exception, // message
       timestamp: new Date().toISOString(),
       path: request.url,
     });

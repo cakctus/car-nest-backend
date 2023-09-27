@@ -1,94 +1,82 @@
+// nest
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+// prisma
+import { PrismaService } from 'src/apps/prisma/prisma.service';
 
 @Injectable()
 export class AllAdsService {
-  async getAllCars(userId: any, page: number, limit: number) {
-    const paginationOptions = { skip: (page - 1) * limit, take: limit };
+  constructor(private readonly prisma: PrismaService) {}
 
-    const totalCount = await prisma.car.count({
-      where: {
-        userId: userId,
-      },
-    });
+  async getAllCars(userId: any) {
+    const totalCount = await this.prisma.$queryRaw`
+      SELECT CAST(COUNT(id) AS INTEGER) 
+      FROM public."Car"
+      WHERE "userId" = ${Number(userId)}
+    `;
 
-    const user = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-      include: {
-        cars: { ...paginationOptions },
-      },
-    });
+    const cars = await this.prisma.$queryRaw`
+      SELECT * 
+      FROM public."Car"
+      WHERE "userId" = ${Number(userId)}
+      ORDER BY "createdAt" DESC;
+    `;
 
     return {
-      cars: user?.cars,
-      totalCount,
+      cars,
+      totalCount: totalCount[0].count,
     };
   }
 
-  async getAllMotos(userId: any, page: any, limit: any) {
-    const paginationOptions = { skip: (page - 1) * limit, take: limit };
+  async getAllMotos(userId: any) {
+    const totalCount = await this.prisma.$queryRaw`
+      SELECT CAST(COUNT(id) AS INTEGER) 
+      FROM public."Moto"
+      WHERE "userId" = ${Number(userId)}
+    `;
 
-    const totalCount = await prisma.moto.count({
-      where: {
-        userId: Number(userId),
-      },
-    });
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: Number(userId),
-      },
-
-      include: {
-        motos: { ...paginationOptions },
-      },
-    });
+    const cars = await this.prisma.$queryRaw`
+      SELECT * 
+      FROM public."Moto"
+      WHERE "userId" = ${Number(userId)}
+      ORDER BY "createdAt" DESC;
+    `;
 
     return {
-      cars: user?.motos,
-      totalCount,
+      cars,
+      totalCount: totalCount[0].count,
     };
   }
 
   async getAllBus(userId: any, page: any, limit: any) {
-    const paginationOptions = { skip: (page - 1) * limit, take: limit };
+    const totalCount = await this.prisma.$queryRaw`
+      SELECT CAST(COUNT(id) AS INTEGER) 
+      FROM public."BusMicrobus"
+      WHERE "userId" = ${Number(userId)}
+    `;
 
-    const totalCount = await prisma.busMicrobus.count({
-      where: {
-        userId: Number(userId),
-      },
-    });
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: Number(userId),
-      },
-
-      include: {
-        bus: { ...paginationOptions },
-      },
-    });
+    const cars = await this.prisma.$queryRaw`
+      SELECT * 
+      FROM public."BusMicrobus"
+      WHERE "userId" = ${Number(userId)}
+      ORDER BY "createdAt" DESC;
+    `;
 
     return {
-      cars: user?.bus,
-      totalCount,
+      cars,
+      totalCount: totalCount[0].count,
     };
   }
 
   async getAllTruck(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.truck.count({
+    const totalCount = await this.prisma.truck.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -107,13 +95,13 @@ export class AllAdsService {
   async getAllTractor(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.agriculture.count({
+    const totalCount = await this.prisma.agriculture.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -132,13 +120,13 @@ export class AllAdsService {
   async getAllConstruction(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.construction.count({
+    const totalCount = await this.prisma.construction.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -157,13 +145,13 @@ export class AllAdsService {
   async getAllTrailer(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.trailer.count({
+    const totalCount = await this.prisma.trailer.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -182,13 +170,13 @@ export class AllAdsService {
   async getAllParts(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.carParts.count({
+    const totalCount = await this.prisma.carParts.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -207,13 +195,13 @@ export class AllAdsService {
   async getAllTruckParts(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.truckParts.count({
+    const totalCount = await this.prisma.truckParts.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -232,13 +220,13 @@ export class AllAdsService {
   async getAllBattery(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.batteries.count({
+    const totalCount = await this.prisma.batteries.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -257,13 +245,13 @@ export class AllAdsService {
   async getAllWheelTire(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.wheelsTire.count({
+    const totalCount = await this.prisma.wheelsTire.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },
@@ -282,13 +270,13 @@ export class AllAdsService {
   async getAllService(userId: any, page: any, limit: any) {
     const paginationOptions = { skip: (page - 1) * limit, take: limit };
 
-    const totalCount = await prisma.autoService.count({
+    const totalCount = await this.prisma.autoService.count({
       where: {
         userId: Number(userId),
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: Number(userId),
       },

@@ -1,9 +1,15 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+// nest
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+// i18n
+import { I18nService } from 'nestjs-i18n';
+// import { PrismaClient } from '@prisma/client';
 import { unlink } from 'node:fs/promises';
 import * as countries from 'country-data';
+import checkFirstNumber from 'utils/phone-number/checkNumber';
+// prisma
+import { PrismaService } from 'src/apps/prisma/prisma.service';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 interface UserDto {
   [key: string]: any;
@@ -11,11 +17,16 @@ interface UserDto {
 
 @Injectable()
 export class ProfileService {
+  constructor(
+    private readonly i18n: I18nService,
+    private readonly prisma: PrismaService,
+  ) {}
+
   async getCountryCodes() {
     return countries.callingCodes.all;
   }
 
-  async userDtoUpdateService(body: any, files: any) {
+  async userDtoUpdateService(body: any, files: any, lang: string) {
     const {
       userId,
       accessToken,
@@ -26,7 +37,6 @@ export class ProfileService {
       userProfilePhoto,
       isStaff,
       numbers,
-      // number,
       ...userDto
     } = body;
     const id = Number(body.userId);
@@ -41,30 +51,68 @@ export class ProfileService {
       {} as UserDto,
     );
 
-    const { number } = userDto;
+    const { number, countryCode } = userDto;
 
     if (number) {
-      const n = await prisma.number.findFirst({
+      try {
+        checkFirstNumber.checkNumber(countryCode, number, lang);
+      } catch (error) {
+        throw new HttpException(
+          this.i18n.t('translation.invalidNumber', {
+            lang,
+          }),
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const n = await this.prisma.number.findFirst({
+        where: {
+          number: String(number.slice(1)),
+        },
+      });
+
+      const numWithZeroStart = await this.prisma.number.findFirst({
         where: {
           number: String(number),
         },
       });
-      if (n) {
-        throw new BadRequestException('Number already exists.');
+
+      if (n || numWithZeroStart) {
+        throw new HttpException(
+          this.i18n.t('translation.numberExistsError', {
+            lang,
+            args: { number },
+          }),
+          HttpStatus.BAD_REQUEST,
+        );
       }
-      const createdNumber = await prisma.number.create({
-        data: {
-          number: String(number),
-          User: {
-            connect: {
-              id,
+
+      if (String(number.at(0)) === '0' && String(countryCode) === '+373') {
+        await this.prisma.number.create({
+          data: {
+            number: String(number.slice(1)),
+            User: {
+              connect: {
+                id,
+              },
             },
           },
-        },
-      });
+        });
+      } else {
+        await this.prisma.number.create({
+          data: {
+            number: String(number),
+            User: {
+              connect: {
+                id,
+              },
+            },
+          },
+        });
+      }
     }
 
-    const user = await prisma.user.update({
+    const user = await this.prisma.user.update({
       where: {
         id,
       },
@@ -74,14 +122,14 @@ export class ProfileService {
     if (files['userPhoto'] && files['userPhoto'][0].fieldname === 'userPhoto') {
       const { filename, destination, path } = files['userPhoto'][0];
       const fName = filename?.replace(/\s+/g, '_');
-      const user = await prisma.user.findUnique({
+      const user = await this.prisma.user.findUnique({
         where: {
           id: Number(userId),
         },
       });
 
       if (user!.userPhoto === '') {
-        const userUpdate = await prisma.user.update({
+        const userUpdate = await this.prisma.user.update({
           where: {
             id: user!.id,
           },
@@ -100,7 +148,7 @@ export class ProfileService {
           console.error('there was an error:', error);
         }
       }
-      const userUpdate = await prisma.user.update({
+      await this.prisma.user.update({
         where: {
           id: user!.id,
         },
@@ -109,21 +157,20 @@ export class ProfileService {
         },
       });
     }
-
     if (
       files['userProfilePhoto'] &&
       files.userProfilePhoto[0].fieldname === 'userProfilePhoto'
     ) {
-      const { filename, destination, path } = files['userProfilePhoto'][0];
+      const { filename } = files['userProfilePhoto'][0];
       const fName = filename?.replace(/\s+/g, '_');
-      const user = await prisma.user.findUnique({
+      const user = await this.prisma.user.findUnique({
         where: {
           id: Number(userId),
         },
       });
 
       if (user!.userProfilePhoto === '') {
-        const userUpdate = await prisma.user.update({
+        const userUpdate = await this.prisma.user.update({
           where: {
             id: user!.id,
           },
@@ -134,7 +181,7 @@ export class ProfileService {
         return userUpdate;
       }
 
-      const userUpdate = await prisma.user.update({
+      const userUpdate = await this.prisma.user.update({
         where: {
           id: user!.id,
         },
@@ -147,21 +194,16 @@ export class ProfileService {
     return user;
   }
 
-  async updateUserPhotoService(
-    destination: any,
-    filename: any,
-    path: any,
-    userId: any,
-  ) {
+  async updateUserPhotoService(destination: any, filename: any, userId: any) {
     const fName = filename?.replace(/\s+/g, '_');
-    const user = await prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         id: Number(userId),
       },
     });
 
     if (user!.userPhoto === '') {
-      const userUpdate = await prisma.user.update({
+      const userUpdate = await this.prisma.user.update({
         where: {
           id: user!.id,
         },
@@ -174,23 +216,13 @@ export class ProfileService {
 
     if (user!.userPhoto.length > 0) {
       try {
-        //@ts-ignore
-        // const __filename = fileURLToPath(import.meta.url)
-        // const __dirname = dirname(__filename)
-        // const f = `media/profile/users/${user!.userPhoto}`
-
-        // console.log(dirname(process.cwd()) + join("/", f)) // /users/joe
-        // console.log(basename(f)) // notes.txt
-        // console.log(extname(f))
-        // console.log(join("/", f))
-        // const j = join("/", f)
         await unlink(destination + '\\' + `${user!.userPhoto}`);
         console.log('successfully deleted');
       } catch (error) {
         console.error('there was an error:', error);
       }
     }
-    const userUpdate = await prisma.user.update({
+    const userUpdate = await this.prisma.user.update({
       where: {
         id: user!.id,
       },
@@ -204,18 +236,17 @@ export class ProfileService {
   async updateUserProfilePhotoService(
     destination: any,
     filename: any,
-    path: any,
     userId: any,
   ) {
     const fName = filename?.replace(/\s+/g, '_');
-    const user = await prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         id: Number(userId),
       },
     });
 
     if (user!.userProfilePhoto === '') {
-      const userUpdate = await prisma.user.update({
+      const userUpdate = await this.prisma.user.update({
         where: {
           id: user!.id,
         },
@@ -228,23 +259,13 @@ export class ProfileService {
 
     if (user!.userPhoto.length > 0) {
       try {
-        //@ts-ignore
-        // const __filename = fileURLToPath(import.meta.url)
-        // const __dirname = dirname(__filename)
-        // const f = `media/profile/users/${user!.userPhoto}`
-
-        // console.log(dirname(process.cwd()) + join("/", f)) // /users/joe
-        // console.log(basename(f)) // notes.txt
-        // console.log(extname(f))
-        // console.log(join("/", f))
-        // const j = join("/", f)
         await unlink(destination + '\\' + `${user!.userProfilePhoto}`);
         console.log('successfully deleted');
       } catch (error) {
         console.error('there was an error:', error);
       }
     }
-    const userUpdate = await prisma.user.update({
+    const userUpdate = await this.prisma.user.update({
       where: {
         id: user!.id,
       },
@@ -259,16 +280,17 @@ export class ProfileService {
     userId: any,
     comunicationMethod: string,
   ) {
-    const user = await prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
     });
 
-    if (!user) throw new BadRequestException('User does not exist');
+    if (!user)
+      throw new HttpException('BadRequestException', HttpStatus.BAD_REQUEST);
 
     if (user) {
-      const updatedUser = await prisma.user.update({
+      const updatedUser = await this.prisma.user.update({
         where: {
           id: userId,
         },
@@ -283,16 +305,17 @@ export class ProfileService {
   }
 
   async addPhoneService(userId: any, number: any) {
-    const user = await prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
     });
 
-    if (!user) throw new BadRequestException('User does not exist');
+    if (!user)
+      throw new HttpException('BadRequestException', HttpStatus.BAD_REQUEST);
 
     if (user) {
-      const updatedUser = await prisma.user.update({
+      const updatedUser = await this.prisma.user.update({
         where: {
           id: userId,
         },
@@ -306,21 +329,90 @@ export class ProfileService {
     }
   }
 
-  async deletePhoneNumberService(id: any) {
-    const number = await prisma.number.findUnique({
+  async deletePhoneNumberService(id: any, lang: string) {
+    const number = await this.prisma.number.findUnique({
       where: {
         id,
       },
+      include: {
+        User: {
+          include: {
+            cars: true,
+            bus: true,
+            trucks: true,
+            tractor: true,
+            construction: true,
+            trailer: true,
+            parts: true,
+            truckParts: true,
+            autoService: true,
+            wheelTire: true,
+          },
+        },
+      },
     });
     if (number) {
-      const deleted = await prisma.number.delete({
+      const { User } = number;
+
+      const isUsedInCar = User!.cars.some(
+        (car) => car.contacts === number.number,
+      );
+      const isUsedInBus = User!.bus.some(
+        (bus) => bus.contacts === number.number,
+      );
+      const isUsedInTruck = User!.trucks.some(
+        (truck) => truck.contacts === number.number,
+      );
+      const isUsedInTractor = User!.tractor.some(
+        (tractor) => tractor.contacts === number.number,
+      );
+      const isUsedInConstruction = User!.construction.some(
+        (construction) => construction.contacts === number.number,
+      );
+      const isUsedInTrailer = User!.trailer.some(
+        (trailer) => trailer.contacts === number.number,
+      );
+      const isUsedInParts = User!.parts.some(
+        (parts) => parts.contacts === number.number,
+      );
+      const isUsedInTruckParts = User!.truckParts.some(
+        (truckParts) => truckParts.contacts === number.number,
+      );
+      const isUsedInAutoService = User!.autoService.some(
+        (autoService) => autoService.contacts === number.number,
+      );
+      const isUsedInWheelTire = User!.wheelTire.some(
+        (wheelTire) => wheelTire.contacts === number.number,
+      );
+
+      if (
+        isUsedInCar ||
+        isUsedInBus ||
+        isUsedInTruck ||
+        isUsedInTractor ||
+        isUsedInConstruction ||
+        isUsedInTrailer ||
+        isUsedInParts ||
+        isUsedInTruckParts ||
+        isUsedInAutoService ||
+        isUsedInWheelTire
+      ) {
+        throw new HttpException(
+          this.i18n.t('translation.deleteNumberError', {
+            lang,
+          }),
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const deleted = await this.prisma.number.delete({
         where: {
           id,
         },
       });
+
       return deleted;
-    } else throw new BadRequestException();
+    } else
+      throw new HttpException('BadRequestException', HttpStatus.BAD_REQUEST);
   }
 }
-
-export default new ProfileService();

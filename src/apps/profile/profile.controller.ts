@@ -1,3 +1,4 @@
+// nest
 import {
   Controller,
   Get,
@@ -11,8 +12,12 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ProfileService } from './profile.service';
+// express
 import { Request, Response, NextFunction } from 'express';
+// services
+import { ProfileService } from './profile.service';
+// utils
+import { deleteKeysByPattern } from 'utils/redis/deleteRedisKeys';
 
 @Controller('api/profile')
 export class ProfileController {
@@ -22,11 +27,10 @@ export class ProfileController {
   async getCountriesCodes(@Res() res: Response, @Next() next: NextFunction) {
     try {
       const response = await this.profileService.getCountryCodes();
+
       return res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      next(
-        new HttpException(`${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR),
-      );
+      next(error);
     }
   }
 
@@ -49,10 +53,18 @@ export class ProfileController {
   ) {
     try {
       const body = JSON.parse(req.body.body);
+      const lang = req.cookies.lang || req.cookies.i18next;
+
       const response = await this.profileService.userDtoUpdateService(
         body,
         files,
+        lang,
       );
+
+      const cookieId = req?.cookies?.sessionID;
+      await deleteKeysByPattern(`*:${cookieId}:*`);
+      await deleteKeysByPattern(`recomendation:car:${cookieId}:*`);
+
       return res.status(200).json(response);
     } catch (error) {
       next(error);
@@ -67,11 +79,13 @@ export class ProfileController {
   ) {
     try {
       const { userId, comunicationMethod } = req.body;
+
       const response =
         await this.profileService.updatecomunicationMethodService(
           userId,
           comunicationMethod,
         );
+
       return res.status(200).json(response);
     } catch (error) {
       next(error);
@@ -86,11 +100,13 @@ export class ProfileController {
   ) {
     try {
       const { userId, number } = req.body;
+
       const response =
         await this.profileService.updatecomunicationMethodService(
           userId,
           number,
         );
+
       return res.status(200).json(response);
     } catch (error) {
       next(error);
@@ -105,7 +121,10 @@ export class ProfileController {
   ) {
     try {
       const { id } = req.body;
-      const data = await this.profileService.deletePhoneNumberService(id);
+      const lang = req.cookies.lang || req.cookies.i18next;
+
+      const data = await this.profileService.deletePhoneNumberService(id, lang);
+
       return res.status(200).json(data);
     } catch (error) {
       next(error);

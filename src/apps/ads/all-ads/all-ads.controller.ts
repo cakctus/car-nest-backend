@@ -1,7 +1,11 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+// nest
+import { Controller, Get, Param, Res, Next } from '@nestjs/common';
+// express
+import { Response, NextFunction } from 'express';
+// services
 import { AllAdsService } from './all-ads.service';
-
-import { Request, Response, NextFunction } from 'express';
+// redis
+import { redisClient } from '../../../main';
 
 @Controller('api')
 export class AllAdsController {
@@ -10,38 +14,55 @@ export class AllAdsController {
   @Get('get-all-ads/:userId/:page/:limit/:categoryClicked')
   async getAllCars(
     @Res() res: Response,
+    @Next() next: NextFunction,
     @Param('userId') userId: string,
-    @Param('page') page: number,
-    @Param('limit') limit: number,
   ) {
     try {
-      const response = await this.allAdsService.getAllCars(
-        Number(userId),
-        Number(page),
-        Number(limit),
+      const response = await this.allAdsService.getAllCars(Number(userId));
+
+      await redisClient.setEx(
+        `myCars:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
       );
-      return res.status(200).json(response);
+
+      console.log('controller get car');
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
   @Get('get-all-motos/:userId/:page/:limit/:categoryClicked')
   async getAllMotos(
     @Param('userId') userId: string,
-    @Param('page') page: number,
-    @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
-      const response = await this.allAdsService.getAllMotos(
-        Number(userId),
-        Number(page),
-        Number(limit),
+      const response = await this.allAdsService.getAllMotos(Number(userId));
+
+      await redisClient.setEx(
+        `myMotos:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
       );
-      return res.status(200).json(response);
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -51,6 +72,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllBus(
@@ -58,9 +80,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myBuses:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -70,6 +105,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllTruck(
@@ -77,9 +113,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myTrucks:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -89,6 +138,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllTractor(
@@ -96,9 +146,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myTractors:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -108,6 +171,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllConstruction(
@@ -115,9 +179,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myConstructions:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -127,6 +204,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllTrailer(
@@ -134,9 +212,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myTrailers:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -146,6 +237,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllParts(
@@ -153,9 +245,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myParts:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -165,6 +270,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllTruckParts(
@@ -172,9 +278,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myTruckParts:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -184,6 +303,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllBattery(
@@ -191,7 +311,20 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myBatteries:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
       throw error;
     }
@@ -203,6 +336,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllWheelTire(
@@ -210,9 +344,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myWheelsTires:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 
@@ -222,6 +369,7 @@ export class AllAdsController {
     @Param('page') page: number,
     @Param('limit') limit: number,
     @Res() res: Response,
+    @Next() next: NextFunction,
   ) {
     try {
       const response = await this.allAdsService.getAllService(
@@ -229,9 +377,22 @@ export class AllAdsController {
         Number(page),
         Number(limit),
       );
-      return res.status(200).json(response);
+
+      await redisClient.setEx(
+        `myServices:${userId}`,
+        2630016,
+        JSON.stringify({
+          ...response,
+          isCached: false,
+        }),
+      );
+
+      return res.status(200).json({
+        ...response,
+        isCached: false,
+      });
     } catch (error) {
-      throw error;
+      next(error);
     }
   }
 }
